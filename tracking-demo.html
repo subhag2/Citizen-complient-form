@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Request Tracking - Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .demo-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .demo-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .shortcode-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            border-left: 4px solid #007cba;
+            margin: 15px 0;
+        }
+        .instructions {
+            background: #e7f3ff;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .instructions h3 {
+            color: #0c5460;
+            margin-top: 0;
+        }
+        .instructions ol {
+            margin-bottom: 0;
+        }
+        .instructions li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Service Request Tracking System</h1>
+            <p>A comprehensive solution for tracking service requests with confirmation numbers and secure PIN verification.</p>
+        </div>
+
+        <div class="demo-section">
+            <h2>📋 How to Use the Tracking System</h2>
+            <div class="instructions">
+                <h3>For WordPress Users:</h3>
+                <ol>
+                    <li>Use the shortcode <code>[service_request_tracking]</code> on any page or post</li>
+                    <li>Users enter their <strong>Confirmation Number</strong> (the ID received after submitting a request)</li>
+                    <li>Users enter their <strong>PIN</strong> (the 4-6 digit security code they created)</li>
+                    <li>The system displays complete request details, status, and timeline</li>
+                </ol>
+            </div>
+
+            <div class="shortcode-box">
+                [service_request_tracking]
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>🔍 Live Tracking Demo</h2>
+            <p>Enter a confirmation number and PIN below to track a service request. If you don't have a real request, you can submit one using the <code>[service_request_form]</code> shortcode first.</p>
+            
+            <!-- This would be replaced by the actual WordPress shortcode -->
+            <div id="tracking-demo">
+                <div class="sr-tracking">
+                    <div class="sr-tracking-header">
+                        <h3>Track Your Service Request</h3>
+                        <p>Enter your confirmation number and PIN to check the status of your service request.</p>
+                    </div>
+
+                    <form id="trackingForm" class="sr-tracking-form">
+                        <div class="sr-field-row" style="display: flex; gap: 20px;">
+                            <div class="sr-field" style="flex: 1;">
+                                <label for="confirmation_number" style="display: block; margin-bottom: 8px; font-weight: 600; color: #495057;">Confirmation Number <span style="color: #dc3545;">*</span></label>
+                                <input type="number" id="confirmation_number" name="confirmation_number" placeholder="Enter confirmation number" required style="width: 100%; padding: 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 16px;">
+                                <div class="sr-error" id="confirmation_number-error" style="color: #dc3545; font-size: 14px; margin-top: 5px; display: none;"></div>
+                            </div>
+                            <div class="sr-field" style="flex: 1;">
+                                <label for="tracking_pin" style="display: block; margin-bottom: 8px; font-weight: 600; color: #495057;">PIN <span style="color: #dc3545;">*</span></label>
+                                <input type="password" id="tracking_pin" name="tracking_pin" maxlength="6" placeholder="Enter your PIN" required style="width: 100%; padding: 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 16px;">
+                                <div class="sr-error" id="tracking_pin-error" style="color: #dc3545; font-size: 14px; margin-top: 5px; display: none;"></div>
+                            </div>
+                        </div>
+                        <div style="text-align: center; margin-top: 20px;">
+                            <button type="submit" class="btn-track" style="background: linear-gradient(135deg, #007cba 0%, #005a87 100%); color: white; border: none; padding: 12px 30px; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer;">Track Request</button>
+                        </div>
+                    </form>
+
+                    <div id="sr-tracking-result" class="sr-tracking-result" style="display: none; background: #ffffff; border: 1px solid #e1e5e9; border-radius: 8px; padding: 25px; margin-top: 20px;"></div>
+                    <div id="sr-tracking-error" class="sr-tracking-error" style="display: none; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 6px; padding: 15px; margin-top: 20px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>✨ Features</h2>
+            <ul>
+                <li><strong>Secure Authentication:</strong> Uses hashed PINs for security</li>
+                <li><strong>Comprehensive Details:</strong> Shows all request information (respecting privacy settings)</li>
+                <li><strong>Status Timeline:</strong> Visual timeline showing request progress</li>
+                <li><strong>Responsive Design:</strong> Works perfectly on mobile and desktop</li>
+                <li><strong>Real-time Validation:</strong> Client-side form validation with helpful error messages</li>
+                <li><strong>Easy Integration:</strong> Simple shortcode implementation</li>
+            </ul>
+        </div>
+
+        <div class="demo-section">
+            <h2>🔧 Technical Implementation</h2>
+            <p>The tracking system consists of:</p>
+            <ul>
+                <li><strong>Frontend Shortcode:</strong> <code>[service_request_tracking]</code> renders the tracking form</li>
+                <li><strong>AJAX Handler:</strong> Processes tracking requests securely</li>
+                <li><strong>Database Security:</strong> PIN verification using password hashing</li>
+                <li><strong>Responsive UI:</strong> Modern CSS with mobile-first design</li>
+                <li><strong>JavaScript Validation:</strong> Real-time form validation and result display</li>
+            </ul>
+        </div>
+
+        <div class="demo-section">
+            <h2>📄 Complete Shortcode Reference</h2>
+            <p>Use these shortcodes in your WordPress pages:</p>
+            
+            <h3>Service Request Form</h3>
+            <div class="shortcode-box">
+                [service_request_form]
+            </div>
+            <p>Creates a multi-step form for users to submit service requests.</p>
+            
+            <h3>Service Request Tracking</h3>
+            <div class="shortcode-box">
+                [service_request_tracking]
+            </div>
+            <p>Creates a tracking interface for users to check their request status.</p>
+        </div>
+    </div>
+
+    <script>
+        // Demo functionality (this would be replaced by actual WordPress AJAX in production)
+        document.getElementById('trackingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const errorDiv = document.getElementById('sr-tracking-error');
+            const resultDiv = document.getElementById('sr-tracking-result');
+            
+            // Hide previous results
+            errorDiv.style.display = 'none';
+            resultDiv.style.display = 'none';
+            
+            // Show demo message
+            errorDiv.innerHTML = '<p><strong>Demo Mode:</strong> This is a demonstration page. In the actual WordPress implementation, this would connect to your database and show real tracking results. To test the full functionality, use the shortcode <code>[service_request_tracking]</code> on a WordPress page with the Service Requests plugin activated.</p>';
+            errorDiv.style.background = '#d1ecf1';
+            errorDiv.style.color = '#0c5460';
+            errorDiv.style.borderColor = '#bee5eb';
+            errorDiv.style.display = 'block';
+        });
+    </script>
+</body>
+</html>
