@@ -9,7 +9,8 @@ class SR_Email {
         
         $headers = [
             'Content-Type: text/html; charset=UTF-8',
-            'From: ' . get_option('blogname') . ' <' . get_option('admin_email') . '>'
+            'From: ' . get_option('blogname') . ' <cameron.gales@carterlake-ia.gov>',
+            'Reply-To: cameron.gales@carterlake-ia.gov'
         ];
         
         // Send to user
@@ -22,14 +23,17 @@ class SR_Email {
     }
     
     public static function send_admin_notification($id, $user_email, $pin = '') {
-        $admin_email = get_option('admin_email');
+        // $admin_email = "subhagnkp@gmail.com";
+        $admin_email = "cameron.gales@carterlake-ia.gov";
+        // $admin_email = get_option('admin_email');
         $subject = "New Service Request Submitted #$id";
         
         $message = self::get_admin_notification_template($id, $user_email, $pin);
         
         $headers = [
             'Content-Type: text/html; charset=UTF-8',
-            'From: ' . get_option('blogname') . ' <' . get_option('admin_email') . '>'
+            'From: ' . get_option('blogname') . ' <' . get_option('admin_email') . '>',
+            'Reply-To: cameron.gales@carterlake-ia.gov'
         ];
         
         return wp_mail($admin_email, $subject, $message, $headers);
@@ -71,24 +75,9 @@ class SR_Email {
                         <h3>Your Request Details:</h3>
                         <p><strong>Confirmation Number:</strong> #{$id}</p>" . 
                         (!empty($pin) ? "<p><strong>Your PIN:</strong> {$pin}</p>" : "<p><strong>PIN:</strong> Not set (you can track using just the confirmation number)</p>") . "
-                        <p><strong>Status:</strong> Pending Review</p>
+                       
                         <p><strong>Submitted:</strong> " . current_time('F j, Y \a\t g:i A') . "</p>
                     </div>
-                    
-                    <div class='important'>
-                        <h4>⚠️ Important:</h4>" . 
-                        (!empty($pin) ? 
-                            "<p>Please save your <strong>Confirmation Number (#{$id})</strong> and <strong>PIN ({$pin})</strong> for your records. You will need these to check the status of your request.</p>" : 
-                            "<p>Please save your <strong>Confirmation Number (#{$id})</strong> for your records. You can use this number to check the status of your request.</p>") . "
-                    </div>
-                    
-                    <h3>What Happens Next?</h3>
-                    <ol>
-                        <li>Our team will review your request within 1-2 business days</li>
-                        <li>You will receive updates via email as your request progresses</li>
-                        <li>You can check your request status anytime using your confirmation number" . (!empty($pin) ? " and PIN" : "") . "</li>
-                    </ol>
-                    
                     <p>If you have any questions or need to provide additional information, please contact us and reference your confirmation number.</p>
                     
                     <p>Thank you for helping us improve our community services.</p>
@@ -149,7 +138,6 @@ class SR_Email {
                         <p><strong>User Email:</strong> {$user_email}</p>" . 
                         (!empty($pin) ? "<p><strong>PIN Protected:</strong> Yes</p>" : "<p><strong>PIN Protected:</strong> No</p>") . "
                         <p><strong>Submitted:</strong> " . current_time('F j, Y \a\t g:i A') . "</p>
-                        <p><strong>Status:</strong> Pending Review</p>
                     </div>" . 
                     
                     ($request ? "
@@ -167,7 +155,6 @@ class SR_Email {
                         <a href='{$admin_url}' class='btn'>View in Admin Panel</a>
                     </div>
                     
-                    <p>Please review this request and update its status accordingly in the admin panel.</p>
                     
                     <p>Best regards,<br>
                     {$site_name} System</p>

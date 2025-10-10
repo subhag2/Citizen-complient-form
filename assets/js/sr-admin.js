@@ -16,7 +16,7 @@ jQuery(function($) {
         
         // View details button
         $('.sr-view-details').on('click', handleViewDetails);
-        
+                
         // Delete request button
         $('.sr-delete-request').on('click', handleDeleteRequest);
         
@@ -30,7 +30,6 @@ jQuery(function($) {
         $('.sr-modal-content').on('click', function(e) {
             e.stopPropagation();
         });
-        
         // Bulk select functionality
         $('#sr-select-all').on('change', handleSelectAll);
         $('.sr-row-checkbox').on('change', handleRowSelect);
@@ -125,7 +124,7 @@ jQuery(function($) {
         
         showRequestDetails(requestId, $row);
     }
-    
+        
     // Handle delete request
     function handleDeleteRequest() {
         const requestId = $(this).data('request-id');
@@ -179,7 +178,6 @@ jQuery(function($) {
             }
         });
     }
-    
     // Show request details in modal
     function showRequestDetails(requestId, $row) {
         const $modal = $('#sr-details-modal');
@@ -203,10 +201,6 @@ jQuery(function($) {
             <div class="sr-detail-section">
                 <h3>Request #${requestId}</h3>
                 <div class="sr-detail-grid">
-                    <div class="sr-detail-item">
-                        <label>Status:</label>
-                        <span class="sr-status-badge sr-status-${status.toLowerCase().replace(' ', '-')}">${status}</span>
-                    </div>
                     <div class="sr-detail-item">
                         <label>Submitted:</label>
                         <span>${date}</span>

@@ -48,7 +48,6 @@ class SR_Admin {
                      '</p></div>';
             }
         }
-        
         // Check if we should render full details page
         if (isset($_GET['action']) && $_GET['action'] === 'view-full' && isset($_GET['request_id'])) {
             $this->render_full_details();
@@ -63,18 +62,18 @@ class SR_Admin {
         $current_page = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
         $offset = ($current_page - 1) * $per_page;
         
-        // Get total count for pagination (excluding deleted records)
+        // Get total count for pagination
         $total_requests = $wpdb->get_var("SELECT COUNT(*) FROM " . SR_DB::table_name() . " WHERE status != 'Deleted'");
         $total_pages = ceil($total_requests / $per_page);
         
-        // Get paginated results (excluding deleted records)
+        // Get paginated results
         $rows = $wpdb->get_results($wpdb->prepare(
             "SELECT * FROM " . SR_DB::table_name() . " WHERE status != 'Deleted' ORDER BY created_at DESC LIMIT %d OFFSET %d",
             $per_page,
             $offset
         ));
         
-        // Get all requests for stats (excluding deleted records)
+        // Get all requests for stats (we still need this for the statistics)
         $all_requests = $wpdb->get_results("SELECT status FROM " . SR_DB::table_name() . " WHERE status != 'Deleted'");
         ?>
         <div class="wrap">
@@ -113,110 +112,110 @@ class SR_Admin {
                         <span class="sr-selected-count">0 selected</span>
                     </div>
                 
-                <div class="sr-admin-table-wrapper">
-                    <table class="wp-list-table widefat fixed striped">
-                        <thead>
-                            <tr>
-                                <th style="width: 40px;"><input type="checkbox" id="sr-select-all"></th>
-                                <th style="width: 60px;">ID</th>
-                                <th>Description</th>
-                                <th style="width: 150px;">Location</th>
-                                <th style="width: 120px;">Contact</th>
-                                <!-- <th style="width: 130px;">Status</th> -->
-                                <th style="width: 120px;">Created</th>
-                                <th style="width: 100px;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        <?php foreach ($rows as $r): ?>
-                            <tr data-request-id="<?php echo $r->id; ?>">
-                                <td><input type="checkbox" name="selected_requests[]" value="<?php echo $r->id; ?>" class="sr-row-checkbox"></td>
-                                <td><strong>#<?php echo $r->id; ?></strong></td>
-                                <td>
-                                    <div class="sr-description">
-                                        <?php echo esc_html(wp_trim_words($r->description, 15)); ?>
-                                    </div>
-                                    <?php if (strlen($r->description) > 100): ?>
-                                        <button type="button" class="button-link sr-toggle-description">Show full description</button>
-                                        <div class="sr-full-description" style="display: none;">
-                                            <?php echo esc_html($r->description); ?>
+                    <div class="sr-admin-table-wrapper">
+                        <table class="wp-list-table widefat fixed striped">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;"><input type="checkbox" id="sr-select-all"></th>
+                                    <th style="width: 60px;">ID</th>
+                                    <th>Description</th>
+                                    <th style="width: 150px;">Location</th>
+                                    <th style="width: 120px;">Contact</th>
+                                    <!-- <th style="width: 130px;">Status</th> -->
+                                    <th style="width: 120px;">Created</th>
+                                    <th style="width: 100px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <?php foreach ($rows as $r): ?>
+                                <tr data-request-id="<?php echo $r->id; ?>">
+                                    <td><input type="checkbox" name="selected_requests[]" value="<?php echo $r->id; ?>" class="sr-row-checkbox"></td>
+                                    <td><strong>#<?php echo $r->id; ?></strong></td>
+                                    <td>
+                                        <div class="sr-description">
+                                            <?php echo esc_html(wp_trim_words($r->description, 15)); ?>
                                         </div>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <div class="sr-location">
-                                        <strong><?php echo esc_html($r->location_general); ?></strong>
-                                        <?php if ($r->location_intersection	): ?>
-                                            <br><small><?php echo esc_html($r->location_intersection	); ?></small>
+                                        <?php if (strlen($r->description) > 100): ?>
+                                            <button type="button" class="button-link sr-toggle-description">Show full description</button>
+                                            <div class="sr-full-description" style="display: none;">
+                                                <?php echo esc_html($r->description); ?>
+                                            </div>
                                         <?php endif; ?>
-                                        <?php if ($r->address): ?>
-                                            <br><small><?php echo esc_html($r->address); ?></small>
-                                        <?php endif; ?>
-                                        <?php if ($r->city || $r->state): ?>
-                                            <br><small><?php echo esc_html(trim($r->city . ', ' . $r->state, ', ')); ?></small>
-                                        <?php endif; ?>
-                                    </div>
-                                </td>
-                                <td>
-                                    <?php if ($r->anonymous): ?>
-                                        <span class="sr-anonymous">Anonymous</span>
-                                    <?php else: ?>
-                                        <div class="sr-contact">
-                                            <?php if ($r->name): ?>
-                                                <strong><?php echo esc_html($r->name); ?></strong><br>
+                                    </td>
+                                    <td>
+                                        <div class="sr-location">
+                                            <strong><?php echo esc_html($r->location_general); ?></strong>
+                                            <?php if ($r->location_intersection	): ?>
+                                                <br><small><?php echo esc_html($r->location_intersection	); ?></small>
                                             <?php endif; ?>
-                                            <?php if ($r->phone): ?>
-                                                <small><?php echo esc_html($r->phone); ?></small><br>
+                                            <?php if ($r->address): ?>
+                                                <br><small><?php echo esc_html($r->address); ?></small>
                                             <?php endif; ?>
-                                            <?php if ($r->email_contact): ?>
-                                                <small><?php echo esc_html($r->email_contact); ?></small>
+                                            <?php if ($r->city || $r->state): ?>
+                                                <br><small><?php echo esc_html(trim($r->city . ', ' . $r->state, ', ')); ?></small>
                                             <?php endif; ?>
                                         </div>
-                                    <?php endif; ?>
-                                </td>
-                                <!-- <td>
-                                    <div class="sr-status-wrapper">
-                                        <span class="sr-status-badge sr-status-<?php echo strtolower(str_replace(' ', '-', $r->status)); ?>">
-                                            <?php echo esc_html($r->status); ?>
-                                        </span>
-                                    </div>
-                                </td> -->
-                                <td>
-                                    <div class="sr-date">
-                                        <?php 
-                                        $date = new DateTime($r->created_at);
-                                        echo $date->format('M j, Y'); 
-                                        ?>
-                                        <br><small><?php echo $date->format('g:i A'); ?></small>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="sr-actions">
-                                        <!-- <select class="sr-status-select" data-request-id="<?php echo $r->id; ?>" data-current-status="<?php echo esc_attr($r->status); ?>">
-                                            <option value="Pending" <?php selected($r->status, 'Pending'); ?>>Pending</option>
-                                            <option value="In Progress" <?php selected($r->status, 'In Progress'); ?>>In Progress</option>
-                                            <option value="Completed" <?php selected($r->status, 'Completed'); ?>>Completed</option>
-                                            <option value="Rejected" <?php selected($r->status, 'Rejected'); ?>>Rejected</option>
-                                        </select> -->
-                                        <button type="button" class="button button-primary sr-update-status" data-request-id="<?php echo $r->id; ?>" style="display: none;">
-                                            Update
-                                        </button>
-                                        <button type="button" class="button sr-view-details" data-request-id="<?php echo $r->id; ?>">
-                                            View Details
-                                        </button>
-                                        <a href="<?php echo admin_url('admin.php?page=sr-requests&action=view-full&request_id=' . $r->id); ?>" class="button button-secondary sr-view-full">
-                                            View Full Details
-                                        </a>
-                                        <button type="button" class="button button-link-delete sr-delete-request" data-request-id="<?php echo $r->id; ?>">
-                                            Delete
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
+                                    </td>
+                                    <td>
+                                        <?php if ($r->anonymous): ?>
+                                            <span class="sr-anonymous">Anonymous</span>
+                                        <?php else: ?>
+                                            <div class="sr-contact">
+                                                <?php if ($r->name): ?>
+                                                    <strong><?php echo esc_html($r->name); ?></strong><br>
+                                                <?php endif; ?>
+                                                <?php if ($r->phone): ?>
+                                                    <small><?php echo esc_html($r->phone); ?></small><br>
+                                                <?php endif; ?>
+                                                <?php if ($r->email_contact): ?>
+                                                    <small><?php echo esc_html($r->email_contact); ?></small>
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    </td>
+                                    <!-- <td>
+                                        <div class="sr-status-wrapper">
+                                            <span class="sr-status-badge sr-status-<?php echo strtolower(str_replace(' ', '-', $r->status)); ?>">
+                                                <?php echo esc_html($r->status); ?>
+                                            </span>
+                                        </div>
+                                    </td> -->
+                                    <td>
+                                        <div class="sr-date">
+                                            <?php 
+                                            $date = new DateTime($r->created_at);
+                                            echo $date->format('M j, Y'); 
+                                            ?>
+                                            <br><small><?php echo $date->format('g:i A'); ?></small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="sr-actions">
+                                            <select class="sr-status-select" data-request-id="<?php echo $r->id; ?>" data-current-status="<?php echo esc_attr($r->status); ?>">
+                                                <option value="Pending" <?php selected($r->status, 'Pending'); ?>>Pending</option>
+                                                <option value="In Progress" <?php selected($r->status, 'In Progress'); ?>>In Progress</option>
+                                                <option value="Completed" <?php selected($r->status, 'Completed'); ?>>Completed</option>
+                                                <option value="Rejected" <?php selected($r->status, 'Rejected'); ?>>Rejected</option>
+                                            </select>
+                                            <button type="button" class="button button-primary sr-update-status" data-request-id="<?php echo $r->id; ?>" style="display: ;">
+                                                Update
+                                            </button>
+                                            <button type="button" class="button sr-view-details" data-request-id="<?php echo $r->id; ?>"  style="display: none;">
+                                                View Details
+                                            </button>
+                                            <a href="<?php echo admin_url('admin.php?page=sr-requests&action=view-full&request_id=' . $r->id); ?>" class="button button-secondary sr-view-full">
+                                                View Details
+                                            </a>
+                                            <button type="button" class="button button-link-delete sr-delete-request" data-request-id="<?php echo $r->id; ?>">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </form>
                 
                 <!-- Pagination -->
@@ -276,9 +275,9 @@ class SR_Admin {
                     <div class="sr-detail-header">
                         <div class="sr-detail-title">
                             <h2>Service Request #<?php echo $request->id; ?></h2>
-                            <span class="sr-status-badge sr-status-<?php echo strtolower(str_replace(' ', '-', $request->status)); ?>">
+                            <!-- <span class="sr-status-badge sr-status-<?php echo strtolower(str_replace(' ', '-', $request->status)); ?>">
                                 <?php echo esc_html($request->status); ?>
-                            </span>
+                            </span> -->
                         </div>
                         <div class="sr-detail-meta">
                             <p><strong>Submitted:</strong> <?php echo date('F j, Y \a\t g:i A', strtotime($request->created_at)); ?></p>
@@ -369,7 +368,7 @@ class SR_Admin {
                         </div>
                         
                         <!-- Status Management Section -->
-                        <div class="sr-detail-section">
+                        <div class="sr-detail-section" style="display: ;">
                             <h3>Status Management</h3>
                             <div class="sr-detail-content">
                                 <div class="sr-status-management">
@@ -387,7 +386,7 @@ class SR_Admin {
                                             <option value="Completed" <?php selected($request->status, 'Completed'); ?>>Completed</option>
                                             <option value="Rejected" <?php selected($request->status, 'Rejected'); ?>>Rejected</option>
                                         </select>
-                                        <button type="button" class="button button-primary sr-update-status" data-request-id="<?php echo $request->id; ?>" style="display: none;">
+                                        <button type="button" class="button button-primary sr-update-status" data-request-id="<?php echo $request->id; ?>" style="display: ;">
                                             Update Status
                                         </button>
                                     </div>
@@ -421,13 +420,10 @@ class SR_Admin {
                         </div>
                     </div>
                     
-                    <div class="sr-detail-actions">
+                    <div class="sr-detail-actions" style="display: none;">
                         <a href="<?php echo admin_url('admin.php?page=sr-requests'); ?>" class="button button-secondary">
                             &larr; Back to All Requests
                         </a>
-                        <button type="button" class="button sr-view-details" data-request-id="<?php echo $request->id; ?>">
-                            Quick View Modal
-                        </button>
                     </div>
                 </div>
             </div>
@@ -610,8 +606,7 @@ class SR_Admin {
             'new_status' => $new_status
         ]);
     }
-
-    public function delete_request() {
+        public function delete_request() {
         // Verify nonce
         if (!wp_verify_nonce($_POST['security'], 'sr_admin_nonce')) {
             wp_send_json_error('Security check failed');

@@ -131,6 +131,7 @@
 }
 
 .sr-field input[type="text"],
+.sr-field input[type="number"],
 .sr-field input[type="email"],
 .sr-field input[type="tel"],
 .sr-field input[type="password"],
