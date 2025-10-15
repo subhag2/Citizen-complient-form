@@ -253,7 +253,35 @@ class SR_Admin {
         if (!$request_id) {
             wp_die('Invalid request ID');
         }
-        
+        // Process admin reply submission (non-AJAX)
+        if (isset($_POST['sr_send_reply']) && intval($_POST['sr_request_id'] ?? 0) === $request_id) {
+            if (!wp_verify_nonce($_POST['sr_reply_nonce'] ?? '', 'sr_reply_action')) {
+                wp_die('Security check failed');
+            }
+
+            if (!current_user_can('manage_options')) {
+                wp_die('Insufficient permissions');
+            }
+
+            $reply_text = trim(sanitize_textarea_field($_POST['sr_reply_text'] ?? ''));
+            $current_user = wp_get_current_user();
+            $replier = $current_user ? $current_user->display_name : '';
+
+            if (!empty($reply_text)) {
+                SR_DB::save_reply($request_id, $reply_text, $replier);
+
+                // Send email to user if email exists
+                $req = SR_DB::get_request($request_id);
+                if ($req && !empty($req->email_contact)) {
+                    SR_Email::send_reply_notification($request_id, $req->email_contact, $reply_text);
+                }
+
+                // Redirect to avoid resubmission
+                wp_safe_redirect(add_query_arg(['page' => 'sr-requests', 'action' => 'view-full', 'request_id' => $request_id, 'reply_sent' => 1], admin_url('admin.php')));
+                exit;
+            }
+        }
+
         $request = SR_DB::get_request($request_id);
         
         if (!$request) {
@@ -391,6 +419,32 @@ class SR_Admin {
                                         </button>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Admin Reply Section -->
+                        <div class="sr-detail-section">
+                            <h3>Admin Reply</h3>
+                            <div class="sr-detail-content">
+                                <?php if (!empty($request->reply_text)): ?>
+                                    <div class="sr-existing-reply">
+                                        <label>Latest Reply (<?php echo esc_html($request->replied_by ?: 'Admin'); ?> on <?php echo esc_html($request->replied_at ?: ''); ?>):</label>
+                                        <div class="sr-reply-box">
+                                            <?php echo nl2br(esc_html($request->reply_text)); ?>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+
+                                <form method="post" style="margin-top:10px;">
+                                    <?php wp_nonce_field('sr_reply_action', 'sr_reply_nonce'); ?>
+                                    <input type="hidden" name="sr_request_id" value="<?php echo $request->id; ?>">
+                                    <div>
+                                        <textarea name="sr_reply_text" rows="5" style="width:100%;" placeholder="Write a reply to the requester..."></textarea>
+                                    </div>
+                                    <div style="margin-top:8px;">
+                                        <button type="submit" name="sr_send_reply" class="button button-primary">Send Reply</button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                         
@@ -599,7 +653,14 @@ class SR_Admin {
             wp_send_json_error('Failed to update status');
             return;
         }
-        
+
+        // Attempt to notify user by email
+        $request = SR_DB::get_request($request_id);
+        if ($request && !empty($request->email_contact)) {
+            // Fire-and-forget, do not block response
+            SR_Email::send_status_change_notification($request_id, $request->email_contact, $new_status);
+        }
+
         wp_send_json_success([
             'message' => 'Status updated successfully',
             'request_id' => $request_id,

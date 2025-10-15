@@ -225,12 +225,7 @@ class SR_Frontend {
                 <div class="sr-step-content" data-step="5">
                     <h3>Step 5: Review & Submit</h3>
                     <div id="review-data" class="review-section"></div>
-                    <div class="sr-field">
-                        <label for="review_email">Confirmation Email <span class="required">*</span></label>
-                        <input type="email" id="review_email" name="review_email" placeholder="Enter email for confirmation" required>
-                        <div class="sr-note">A confirmation will be sent to this email address</div>
-                        <div class="sr-error" id="review_email-error"></div>
-                    </div>
+                    <!-- Confirmation email removed: notifications will be sent automatically to the contact email (email_contact) when admin replies or status changes -->
                     <div class="sr-buttons">
                         <button type="button" class="btn-prev">Previous</button>
                         <button type="submit" class="btn-submit">Submit Request</button>
@@ -328,7 +323,7 @@ class SR_Frontend {
         <div class="tracking-result-content">
             <div class="result-header">
                 <h3>Service Request #<?php echo $request->id; ?></h3>
-                <div class="status-badge d-none <?php echo $status_class; ?>"><?php echo esc_html($request->status); ?></div>
+                <div class="status-badge d-none1 <?php echo $status_class; ?>"><?php echo esc_html($request->status); ?></div>
             </div>
             
             <div class="result-section">
@@ -375,7 +370,19 @@ class SR_Frontend {
                 </div>
             <?php endif; ?>
             
-            <div class="result-section d-none">
+            <?php if (!empty($request->reply_text)): ?>
+                <div class="result-section">
+                    <h4>Response from Administration</h4>
+                    <div class="sr-admin-reply">
+                        <?php echo nl2br(esc_html($request->reply_text)); ?>
+                        <?php if (!empty($request->replied_at)): ?>
+                            <div class="sr-reply-meta"><small>Replied on <?php echo esc_html(date('M j, Y \a\t g:i A', strtotime($request->replied_at))); ?><?php if (!empty($request->replied_by)) echo ' by ' . esc_html($request->replied_by); ?></small></div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+            
+            <div class="result-section d-none1">
                 <h4>Status Information</h4>
                 <p>Current status: <strong class="<?php echo $status_class; ?>"><?php echo esc_html($request->status); ?></strong></p>
                 <div class="status-timeline">

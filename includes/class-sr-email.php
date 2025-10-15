@@ -38,6 +38,38 @@ class SR_Email {
         
         return wp_mail($admin_email, $subject, $message, $headers);
     }
+
+    /**
+     * Send an email to the user when admin replies to their request.
+     */
+    public static function send_reply_notification($id, $to, $reply_text) {
+        $subject = "Update on Service Request #$id";
+
+        $message = self::get_reply_template($id, $reply_text);
+
+        $headers = [
+            'Content-Type: text/html; charset=UTF-8',
+            'From: ' . get_option('blogname') . ' <' . get_option('admin_email') . '>'
+        ];
+
+        return wp_mail($to, $subject, $message, $headers);
+    }
+
+    /**
+     * Send an email to the user when the status changes.
+     */
+    public static function send_status_change_notification($id, $to, $new_status) {
+        $subject = "Service Request #$id Status Update: $new_status";
+
+        $message = self::get_status_change_template($id, $new_status);
+
+        $headers = [
+            'Content-Type: text/html; charset=UTF-8',
+            'From: ' . get_option('blogname') . ' <' . get_option('admin_email') . '>'
+        ];
+
+        return wp_mail($to, $subject, $message, $headers);
+    }
     
     private static function get_confirmation_template($id, $pin) {
         $site_name = get_option('blogname');
@@ -90,6 +122,43 @@ class SR_Email {
                     <p>Please do not reply directly to this email.</p>
                 </div>
             </div>
+        </body>
+        </html>
+        ";
+    }
+
+    private static function get_reply_template($id, $reply_text) {
+        $site_name = get_option('blogname');
+        $site_url = get_site_url();
+
+        return "
+        <html>
+        <body>
+            <h2>Update for Service Request #{$id}</h2>
+            <p>Dear Resident,</p>
+            <p>Our team has added the following reply to your service request:</p>
+            <div style='background:#f4f4f4;padding:15px;border-radius:6px;margin:10px 0;'>" . nl2br(esc_html($reply_text)) . "</div>
+            <p>If you have further questions, please reply to this email or check your request online.</p>
+            <p>Regards,<br>{$site_name} Service Team</p>
+            <p><small><a href='{$site_url}'>Visit {$site_name}</a></small></p>
+        </body>
+        </html>
+        ";
+    }
+
+    private static function get_status_change_template($id, $new_status) {
+        $site_name = get_option('blogname');
+        $site_url = get_site_url();
+
+        return "
+        <html>
+        <body>
+            <h2>Service Request #{$id} Status Updated</h2>
+            <p>Dear Resident,</p>
+            <p>The status for your service request #{$id} has been updated to: <strong>{$new_status}</strong>.</p>
+            <p>If you have questions, please check the request details online or contact us.</p>
+            <p>Regards,<br>{$site_name} Service Team</p>
+            <p><small><a href='{$site_url}'>Visit {$site_name}</a></small></p>
         </body>
         </html>
         ";

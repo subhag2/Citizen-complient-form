@@ -153,15 +153,7 @@ jQuery(function($) {
                 break;
                 
             case 5:
-                // Review email validation
-                const reviewEmail = $('#review_email').val().trim();
-                if (!reviewEmail) {
-                    showError('review_email', 'Confirmation email is required');
-                    isValid = false;
-                } else if (!isValidEmail(reviewEmail)) {
-                    showError('review_email', 'Please enter a valid email address');
-                    isValid = false;
-                }
+                // No longer require a separate confirmation email; contact email is optional and validated earlier
                 break;
         }
         

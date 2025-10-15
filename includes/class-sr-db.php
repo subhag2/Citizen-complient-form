@@ -12,6 +12,9 @@ class SR_DB {
         $table = self::table_name();
         $charset = $wpdb->get_charset_collate();
 
+        // Include reply fields (reply_text, replied_at, replied_by) so admin replies
+        // are persisted and can be shown on the tracking page. dbDelta will add
+        // these columns to existing tables when the plugin is updated.
         $sql = "CREATE TABLE $table (
             id BIGINT(20) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             description TEXT NOT NULL,
@@ -31,6 +34,9 @@ class SR_DB {
             email_contact VARCHAR(150),
             pin_hash VARCHAR(255) NOT NULL,
             status VARCHAR(50) DEFAULT 'Pending',
+            reply_text TEXT,
+            replied_at DATETIME NULL,
+            replied_by VARCHAR(150) DEFAULT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) $charset;";
 
@@ -52,6 +58,18 @@ class SR_DB {
     public static function update_status($id, $status) {
         global $wpdb;
         return $wpdb->update(self::table_name(), ['status' => $status], ['id' => $id]);
+    }
+
+    public static function save_reply($id, $reply_text, $replied_by = '') {
+        global $wpdb;
+
+        $data = [
+            'reply_text' => $reply_text,
+            'replied_at' => current_time('mysql'),
+            'replied_by' => $replied_by
+        ];
+
+        return $wpdb->update(self::table_name(), $data, ['id' => $id]);
     }
 
     public static function get_request_by_id_and_pin($id, $pin) {

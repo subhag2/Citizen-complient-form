@@ -78,9 +78,18 @@ class SR_Ajax {
             return;
         }
 
-        // Send confirmation email
-        if (isset($complete_data['review_email']) && !empty($complete_data['review_email'])) {
-            SR_Email::send_confirmation($request_id, $complete_data['review_email'], $saved_data['pin'] ?? '');
+        // Confirmation email option removed - notifications will be sent to the contact email when admin replies or status changes
+
+        // If request was submitted anonymously, notify admin only.
+        // For non-anonymous submissions, send confirmation to the user (which also notifies admin inside send_confirmation()).
+        if (!empty($db_data['anonymous'])) {
+            // Anonymous submission - notify admin only
+            SR_Email::send_admin_notification($request_id, $db_data['email_contact'] ?? '', $saved_data['pin'] ?? '');
+        } else {
+            // Non-anonymous - send confirmation to user (and admin notification is handled inside send_confirmation)
+            if (!empty($db_data['email_contact'])) {
+                SR_Email::send_confirmation($request_id, $db_data['email_contact'], $saved_data['pin'] ?? '');
+            }
         }
 
         // Clear session data
@@ -109,7 +118,6 @@ class SR_Ajax {
                     break;
                     
                 case 'email_contact':
-                case 'review_email':
                     $sanitized[$key] = sanitize_email($value);
                     break;
                     
@@ -161,9 +169,7 @@ class SR_Ajax {
             $errors[] = 'Invalid contact email format';
         }
         
-        if (!empty($data['review_email']) && !is_email($data['review_email'])) {
-            $errors[] = 'Invalid confirmation email format';
-        }
+        // 'review_email' removed; we validate only the contact email when present
         
         // Anonymous validation - if not anonymous, name should be provided
         if (empty($data['anonymous']) && empty($data['name'])) {
