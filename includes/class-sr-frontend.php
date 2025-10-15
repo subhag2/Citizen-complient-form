@@ -382,7 +382,7 @@ class SR_Frontend {
                 </div>
             <?php endif; ?>
             
-            <div class="result-section d-none1">
+            <div class="result-section d-none">
                 <h4>Status Information</h4>
                 <p>Current status: <strong class="<?php echo $status_class; ?>"><?php echo esc_html($request->status); ?></strong></p>
                 <div class="status-timeline">

@@ -78,8 +78,6 @@ class SR_Ajax {
             return;
         }
 
-        // Confirmation email option removed - notifications will be sent to the contact email when admin replies or status changes
-
         // If request was submitted anonymously, notify admin only.
         // For non-anonymous submissions, send confirmation to the user (which also notifies admin inside send_confirmation()).
         if (!empty($db_data['anonymous'])) {
@@ -91,7 +89,7 @@ class SR_Ajax {
                 SR_Email::send_confirmation($request_id, $db_data['email_contact'], $saved_data['pin'] ?? '');
             }
         }
-
+        
         // Clear session data
         unset($_SESSION['sr_form_data']);
 
