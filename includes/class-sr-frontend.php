@@ -37,10 +37,6 @@ class SR_Frontend {
                 </div>
                 <div class="sr-step" data-step="4">
                     <span class="step-number">4</span>
-                    <span class="step-title">Security</span>
-                </div>
-                <div class="sr-step" data-step="5">
-                    <span class="step-number">5</span>
                     <span class="step-title">Review</span>
                 </div>
             </div>
@@ -201,29 +197,9 @@ class SR_Frontend {
                     </div>
                 </div>
 
-                <!-- Step 4: Security PIN -->
+                <!-- Step 4: Review -->
                 <div class="sr-step-content" data-step="4">
-                    <h3>Step 4: Set Security PIN</h3>
-                    <div class="sr-field">
-                        <label for="pin">Create a 4-6 digit PIN <span class="required">*</span></label>
-                        <input type="password" id="pin" name="pin" maxlength="6" minlength="4" placeholder="Enter 4-6 digits" >
-                        <div class="sr-note">You will need this PIN to check the status of your request</div>
-                        <div class="sr-error" id="pin-error"></div>
-                    </div>
-                    <div class="sr-field">
-                        <label for="pin_confirm">Confirm PIN <span class="required">*</span></label>
-                        <input type="password" id="pin_confirm" name="pin_confirm" maxlength="6" minlength="4" placeholder="Re-enter your PIN" >
-                        <div class="sr-error" id="pin_confirm-error"></div>
-                    </div>
-                    <div class="sr-buttons">
-                        <button type="button" class="btn-prev">Previous</button>
-                        <button type="button" id="saveData">Save & Continue</button>
-                    </div>
-                </div>
-
-                <!-- Step 5: Review -->
-                <div class="sr-step-content" data-step="5">
-                    <h3>Step 5: Review & Submit</h3>
+                    <h3>Step 4: Review & Submit</h3>
                     <div id="review-data" class="review-section"></div>
                     <!-- Confirmation email removed: notifications will be sent automatically to the contact email (email_contact) when admin replies or status changes -->
                     <div class="sr-buttons">

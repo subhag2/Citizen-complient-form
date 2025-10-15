@@ -3,8 +3,7 @@ if (!defined('ABSPATH')) exit;
 
 class SR_Ajax {
     public function __construct() {
-        add_action('wp_ajax_sr_save_step4', [$this, 'save_step4']);
-        add_action('wp_ajax_nopriv_sr_save_step4', [$this, 'save_step4']);
+        // PIN step removed; save_step4 handler registration removed
 
         add_action('wp_ajax_sr_submit_form', [$this, 'submit_form']);
         add_action('wp_ajax_nopriv_sr_submit_form', [$this, 'submit_form']);
@@ -13,34 +12,7 @@ class SR_Ajax {
         add_action('wp_ajax_nopriv_sr_track_request', [$this, 'track_request']);
     }
 
-    public function save_step4() {
-        // Verify nonce
-        if (!wp_verify_nonce($_POST['security'], 'sr_nonce')) {
-            wp_send_json_error('Security check failed');
-            return;
-        }
-
-        // Get and sanitize form data
-        $form_data = $this->sanitize_form_data($_POST['formData']);
-        
-        // Validate PIN
-        if (!isset($form_data['pin']) || !preg_match('/^\d{4,6}$/', $form_data['pin'])) {
-            wp_send_json_error('Invalid PIN format. Must be 4-6 digits.');
-            return;
-        }
-
-        // Hash the PIN for security
-        $form_data['pin_hash'] = password_hash($form_data['pin'], PASSWORD_DEFAULT);
-        unset($form_data['pin_confirm']); // Remove confirmation PIN from data
-
-        // Save data in session for review step
-        if (!session_id()) {
-            session_start();
-        }
-        $_SESSION['sr_form_data'] = $form_data;
-
-        wp_send_json_success(['message' => 'Data saved successfully. Continue to review.']);
-    }
+    // save_step4 removed - PIN is generated server-side during final submit
 
     public function submit_form() {
         // Verify nonce
@@ -60,6 +32,18 @@ class SR_Ajax {
         // Merge the data
         $complete_data = array_merge($saved_data, $final_data);
         
+        // If PIN was not provided by the frontend (step removed), generate a 4-6 digit PIN here
+        $generated_pin = '';
+        if (empty($complete_data['pin_hash'])) {
+            // generate 4-6 digit PIN (1000-999999)
+            $generated_pin = strval(random_int(1000, 999999));
+            // ensure it's between 4 and 6 digits
+            $complete_data['pin_hash'] = password_hash($generated_pin, PASSWORD_DEFAULT);
+        } else {
+            // If pin was stored in session (older flows), try to preserve plaintext
+            $generated_pin = $saved_data['pin'] ?? '';
+        }
+
         // Validate required fields
         $validation_result = $this->validate_complete_data($complete_data);
         if (!$validation_result['valid']) {
@@ -70,8 +54,8 @@ class SR_Ajax {
         // Prepare data for database
         $db_data = $this->prepare_db_data($complete_data);
         
-        // Insert into database
-        $request_id = SR_DB::insert_request($db_data);
+    // Insert into database
+    $request_id = SR_DB::insert_request($db_data);
         
         if (!$request_id) {
             wp_send_json_error('Failed to save request to database');
@@ -82,11 +66,11 @@ class SR_Ajax {
         // For non-anonymous submissions, send confirmation to the user (which also notifies admin inside send_confirmation()).
         if (!empty($db_data['anonymous'])) {
             // Anonymous submission - notify admin only
-            SR_Email::send_admin_notification($request_id, $db_data['email_contact'] ?? '', $saved_data['pin'] ?? '');
+            SR_Email::send_admin_notification($request_id, $db_data['email_contact'] ?? '', $generated_pin);
         } else {
             // Non-anonymous - send confirmation to user (and admin notification is handled inside send_confirmation)
             if (!empty($db_data['email_contact'])) {
-                SR_Email::send_confirmation($request_id, $db_data['email_contact'], $saved_data['pin'] ?? '');
+                SR_Email::send_confirmation($request_id, $db_data['email_contact'], $generated_pin);
             }
         }
         
@@ -96,7 +80,7 @@ class SR_Ajax {
         wp_send_json_success([
             'message' => 'Your service request has been submitted successfully!',
             'confirmation' => $request_id,
-            'pin' => $saved_data['pin'] ?? ''
+            'pin' => $generated_pin
         ]);
     }
 

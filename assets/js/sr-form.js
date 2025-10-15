@@ -2,7 +2,7 @@ jQuery(function($) {
     'use strict';
     
     let currentStep = 1;
-    const totalSteps = 5;
+    const totalSteps = 4;
     let formData = {};
     
     // Initialize form
@@ -17,14 +17,13 @@ jQuery(function($) {
         // Navigation buttons
         $('.btn-next').on('click', handleNext);
         $('.btn-prev').on('click', handlePrev);
-        $('#saveData').on('click', handleSaveStep4);
+    // PIN step removed - no saveStep handler
         $('#serviceRequestForm').on('submit', handleFinalSubmit);
         
         // Anonymous checkbox
         $('#anonymous').on('change', toggleContactFields);
         
-        // PIN confirmation validation
-        $('#pin_confirm').on('input', validatePinMatch);
+    // PIN step removed - no PIN confirmation
         
         // Real-time validation
         $('input[required], textarea[required]').on('blur', function() {
@@ -46,8 +45,8 @@ jQuery(function($) {
                 showStep(currentStep);
                 updateStepIndicators();
                 
-                // If moving to review step, populate review data
-                if (currentStep === 5) {
+                // If moving to review step (now step 4), populate review data
+                if (currentStep === 4) {
                     populateReviewData();
                 }
             }
@@ -137,23 +136,7 @@ jQuery(function($) {
                 break;
                 
             case 4:
-                // PIN validation
-                const pin = $('#pin').val();
-                const pinConfirm = $('#pin_confirm').val();
-                
-                if (!/^\d{4,6}$/.test(pin)) {
-                    showError('pin', 'PIN must be 4-6 digits only');
-                    isValid = false;
-                }
-                
-                if (pin !== pinConfirm) {
-                    showError('pin_confirm', 'PINs do not match');
-                    isValid = false;
-                }
-                break;
-                
-            case 5:
-                // No longer require a separate confirmation email; contact email is optional and validated earlier
+                // Review step - no extra validation here beyond required fields
                 break;
         }
         
@@ -198,19 +181,7 @@ jQuery(function($) {
         return emailRegex.test(email);
     }
     
-    // Validate PIN match
-    function validatePinMatch() {
-        const pin = $('#pin').val();
-        const pinConfirm = $('#pin_confirm').val();
-        
-        if (pinConfirm && pin !== pinConfirm) {
-            showError('pin_confirm', 'PINs do not match');
-            return false;
-        }
-        
-        hideError('pin_confirm');
-        return true;
-    }
+    // PIN step removed - PIN generation happens server-side
     
     // Show error message
     function showError(fieldName, message) {
@@ -304,39 +275,7 @@ jQuery(function($) {
         $('#review-data').html(reviewHtml);
     }
     
-    // Handle Save & Continue for step 4
-    function handleSaveStep4(e) {
-        e.preventDefault();
-        
-        if (!validateCurrentStep()) {
-            return;
-        }
-        
-        collectStepData();
-        setLoading(true);
-        
-        $.post(SR_Ajax.ajax_url, {
-            action: 'sr_save_step4',
-            security: SR_Ajax.nonce,
-            formData: formData
-        })
-        .done(function(response) {
-            if (response.success) {
-                currentStep++;
-                showStep(currentStep);
-                updateStepIndicators();
-                populateReviewData();
-            } else {
-                alert('Error saving data: ' + (response.data || 'Unknown error'));
-            }
-        })
-        .fail(function() {
-            alert('Network error. Please try again.');
-        })
-        .always(function() {
-            setLoading(false);
-        });
-    }
+    // Save-step handler removed; final submit handles PIN generation server-side
     
     // Handle final form submission
     function handleFinalSubmit(e) {
